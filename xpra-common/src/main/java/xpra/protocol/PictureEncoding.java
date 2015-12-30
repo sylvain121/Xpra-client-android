@@ -11,7 +11,8 @@ public enum PictureEncoding {
 	jpeg,
 	png,
 	pngP("png/P"),
-	pngL("png/L");
+	pngL("png/L"),
+	h264;
 
 	private static final PictureEncoding[] values = values();
 	private final String code;
