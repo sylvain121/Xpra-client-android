@@ -36,7 +36,7 @@ dependencies {
 
     compile 'com.android.support:appcompat-v7:23.0.0'
     compile 'com.android.support:design:23.0.0'
-    compile 'org.jcodec:jcodec-android:0.1.9'
+    compile files('libs/jcodec-0.2.0.jar')
 
     //compile 'com.android.support:support-v13:+'
     //compile 'com.android.support:recyclerview-v7:+'

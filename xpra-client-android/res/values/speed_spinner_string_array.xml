@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="speed_spinner_string_array">
+        <item>Auto</item>
+        <item>Lowest Bandwidth</item>
+        <item>Low Bandwidth</item>
+        <item>Low Latency</item>
+        <item>Lowest Latency</item>
+    </string-array>
+</resources>

@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="min_speed_spinner_string_array">
+        <item>None</item>
+        <item>Low Bandwidth</item>
+        <item>Low Latency</item>
+    </string-array>
+</resources>

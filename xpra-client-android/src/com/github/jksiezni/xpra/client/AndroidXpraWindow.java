@@ -6,8 +6,9 @@ package com.github.jksiezni.xpra.client;
 import java.util.ArrayList;
 import java.util.List;
 
+import android.view.*;
+import com.github.jksiezni.xpra.h264.H264Buffer;
 import com.github.jksiezni.xpra.h264.H264Decoder;
-import org.jcodec.common.AndroidUtil;
 import xpra.client.XpraWindow;
 import xpra.protocol.packets.DrawPacket;
 import xpra.protocol.packets.NewWindow;
@@ -25,11 +26,7 @@ import android.graphics.drawable.Drawable;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.util.Log;
-import android.view.KeyEvent;
-import android.view.MotionEvent;
-import android.view.TextureView;
 import android.view.TextureView.SurfaceTextureListener;
-import android.view.View;
 import android.view.View.OnKeyListener;
 import android.view.View.OnTouchListener;
 import android.widget.RelativeLayout;
@@ -38,7 +35,7 @@ import android.widget.RelativeLayout.LayoutParams;
 /**
  * @author Jakub Księżniak
  */
-public class AndroidXpraWindow extends XpraWindow implements OnTouchListener, OnKeyListener {
+public class AndroidXpraWindow extends XpraWindow implements OnTouchListener, OnKeyListener, TextureView.SurfaceTextureListener {
 
     private final TextureView textureView;
     private final Handler uiHandler;
@@ -51,10 +48,12 @@ public class AndroidXpraWindow extends XpraWindow implements OnTouchListener, On
     // window properties
     private String title;
     private Bitmap icon;
+    private int currentWindowWidth = 0;
+    private int currentWindowsHeight = 0;
 
     public AndroidXpraWindow(NewWindow wnd, Context context) {
         super(wnd);
-        this.renderer = new Renderer();
+        this.renderer = new Renderer(this);
         this.uiHandler = new Handler(context.getMainLooper());
         this.textureView = new TextureView(context);
         this.textureView.setSurfaceTextureListener(renderer);
@@ -62,7 +61,7 @@ public class AndroidXpraWindow extends XpraWindow implements OnTouchListener, On
         this.textureView.setOnKeyListener(this);
         this.textureView.setPivotX(0);
         this.textureView.setPivotY(0);
-        this.decoder = new H264Decoder(H264Decoder.FORCE_SOFTWARE_DECODE);
+
     }
 
     @Override
@@ -90,6 +89,10 @@ public class AndroidXpraWindow extends XpraWindow implements OnTouchListener, On
     @Override
     protected void onStop() {
         Log.i(getClass().getSimpleName(), "onStop() windowId=" + getId());
+        if(this.decoder != null) {
+            this.decoder.stopDecode();
+        }
+
     }
 
     @Override
@@ -164,7 +167,6 @@ public class AndroidXpraWindow extends XpraWindow implements OnTouchListener, On
             }
         });
     }
-
     protected void fireOnIconChanged() {
         uiHandler.post(new Runnable() {
             @Override
@@ -178,33 +180,47 @@ public class AndroidXpraWindow extends XpraWindow implements OnTouchListener, On
         });
     }
 
+
+
     @Override
     public void draw(DrawPacket packet) {
-        Rect dirty = new Rect(packet.x, packet.y, packet.x + packet.w, packet.y + packet.h);
+
         if (packet.encoding == null) {
             return;
         }
+
         try {
-            Canvas canvas = textureView.lockCanvas(dirty);
+
             switch (packet.encoding) {
                 case h264:
-                    canvas.drawBitmap(decoder.decode(packet), packet.x, packet.y, null);
+                    if(this.currentWindowWidth != packet.w || this.currentWindowsHeight != packet.h) {
+                        Log.d(this.getClass().getName(), "New Decoder Factory");
+                        this.currentWindowWidth = packet.w;
+                        this.currentWindowsHeight = packet.h;
+                        this.decoder = H264Decoder.create(packet.w, packet.h, new Surface(this.textureView.getSurfaceTexture()));
+                    }
+                    this.decoder.getBuffer().addPacketToQueue(packet);
+                    break;
                 case png:
                 case pngL:
                 case pngP:
                 case jpeg:
+                    Rect dirty = new Rect(packet.x, packet.y, packet.x + packet.w, packet.y + packet.h);
+                    Canvas canvas = textureView.lockCanvas(dirty);
                     Bitmap bitmap = BitmapFactory.decodeByteArray(packet.data, 0, packet.data.length);
                     canvas.drawBitmap(bitmap, packet.x, packet.y, null);
+                    textureView.unlockCanvasAndPost(canvas);
                     bitmap.recycle();
                     break;
 
                 default:
                     break;
             }
-            textureView.unlockCanvasAndPost(canvas);
+
         } catch (Exception e) {
             e.printStackTrace();
         }
+
     }
 
     @SuppressLint("ClickableViewAccessibility")
@@ -255,20 +271,64 @@ public class AndroidXpraWindow extends XpraWindow implements OnTouchListener, On
         closeWindow();
     }
 
+    public void setQuality() {
+
+    }
+
+    public void setMinQuality() {
+
+    }
+
+    public void setSpeed() {
+
+    }
+
+    public void setMinSpeed() {
+
+    }
+
+    @Override
+    public void onSurfaceTextureAvailable(SurfaceTexture surface, int width, int height) {
+;
+    }
+
+    @Override
+    public void onSurfaceTextureSizeChanged(SurfaceTexture surface, int width, int height) {
+
+    }
+
+    @Override
+    public boolean onSurfaceTextureDestroyed(SurfaceTexture surface) {
+        return false;
+    }
+
+    @Override
+    public void onSurfaceTextureUpdated(SurfaceTexture surface) {
+
+    }
+
+    public void setH264Decoder(H264Decoder h264Decoder) {
+        this.decoder = h264Decoder;
+    }
+
     private class Renderer extends HandlerThread implements SurfaceTextureListener {
 
-        public Renderer() {
+
+        private final AndroidXpraWindow xpraWindow;
+
+        public Renderer(AndroidXpraWindow xpraWindow) {
             super("Renderer");
+            this.xpraWindow = xpraWindow;
         }
 
         @Override
         public void onSurfaceTextureAvailable(SurfaceTexture surface, int width, int height) {
             Log.i(getClass().getSimpleName(), "onSurfaceTextureAvailable(): " + width + "x" + height);
-
             final int x = (int) getView().getX();
             final int y = (int) getView().getY();
             mapWindow(x, y, width, height);
             setFocused(true);
+
         }
 
         @Override

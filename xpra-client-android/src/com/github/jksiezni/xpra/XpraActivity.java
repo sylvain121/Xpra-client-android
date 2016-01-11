@@ -4,6 +4,7 @@ import android.app.Fragment;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.Configuration;
+import android.graphics.SurfaceTexture;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -14,13 +15,11 @@ import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.view.LayoutInflater;
-import android.view.Menu;
-import android.view.MenuItem;
-import android.view.View;
-import android.view.ViewGroup;
+import android.view.*;
 import android.view.inputmethod.InputMethodManager;
+import android.widget.ArrayAdapter;
 import android.widget.RelativeLayout;
+import android.widget.Spinner;
 import android.widget.TextView;
 
 import com.github.jksiezni.xpra.client.AndroidXpraClient;
@@ -40,6 +39,8 @@ import xpra.network.SshXpraConnector;
 import xpra.network.TcpXpraConnector;
 import xpra.network.XpraConnector;
 import xpra.network.XpraConnector.ConnectionListener;
+import xpra.protocol.packets.Quality;
+import xpra.protocol.packets.Speed;
 
 public class XpraActivity extends AppCompatActivity implements OnStackListener,
 	OnNavigationItemSelectedListener, XpraWindowListener {
@@ -247,6 +248,7 @@ public class XpraActivity extends AppCompatActivity implements OnStackListener,
 		menu.setChecked(true);
 		
 		hackfixNavigationView();
+
 	}
 
 	private void hackfixNavigationView() {
@@ -272,10 +274,60 @@ public class XpraActivity extends AppCompatActivity implements OnStackListener,
 		case R.id.drawer_disconnect:
 			finish();
 			return true;
-
 		default:
 			return false;
 		}
+	}
+
+	public void setQuality( MenuItem item) {
+		int quality = 0;
+		switch (item.getItemId()) {
+			case R.id.drawer_qualityAuto:
+				quality=0;
+				break;
+			case R.id.drawer_quality1:
+				quality=1;
+				break;
+			case R.id.drawer_quality10:
+				quality = 10;
+				break;
+			case R.id.drawer_quality30:
+				quality = 30;
+				break;
+			case R.id.drawer_quality50:
+				quality = 50;
+				break;
+			case R.id.drawer_quality70:
+				quality = 70;
+				break;
+			case R.id.drawer_quality90:
+				quality = 90;
+				break;
+
+		}
+		xpraClient.getSender().send(new Quality(quality));
+	}
+
+	public void setSpeed( MenuItem item ) {
+		int speed = 0;
+		switch (item.getItemId()) {
+			case R.id.drawer_speedAuto:
+				speed = 0;
+				break;
+			case R.id.drawer_speed_low_bandwidth:
+				speed = 30;
+				break;
+			case R.id.drawer_speed_lowest_bandwidth:
+				speed = 1;
+				break;
+			case R.id.drawer_speed_low_latency:
+				speed = 70;
+				break;
+			case R.id.drawer_speed_lowest_latency:
+				speed = 100;
+				break;
+		}
+		xpraClient.getSender().send(new Speed(speed));
 	}
 
 	@Override
@@ -294,7 +346,7 @@ public class XpraActivity extends AppCompatActivity implements OnStackListener,
 			hackfixNavigationView();
 		}
 	}
-	
+
 	public static class ConnectingFragment extends Fragment implements ConnectionListener {
 		private static final int MSG_ERROR = 1;
 		private static final int MSG_CONNECTED = 2;

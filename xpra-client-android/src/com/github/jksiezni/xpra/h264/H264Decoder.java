@@ -1,37 +1,37 @@
 package com.github.jksiezni.xpra.h264;
 
-import android.graphics.Bitmap;
-import android.media.MediaCodec;
-import org.jcodec.common.AndroidUtil;
-import org.jcodec.common.model.ColorSpace;
-import org.jcodec.common.model.Picture;
-import xpra.protocol.packets.DrawPacket;
-
-import java.nio.ByteBuffer;
+import android.view.Surface;
+;
 
 /**
  * Created by sylvain121 on 29/12/15.
  */
 public class H264Decoder {
 
-    public static int FORCE_HARDWARE_DECODE = 1;
-    public static int FORCE_SOFTWARE_DECODE = 1;
-    private IH264Decoder decoder;
+    private final int width;
+    private final int height;
+    private final Surface rendererSurface;
+    private final MediaCodecH264DecoderThread thread;
+    private H264Buffer buffer = new H264Buffer();
 
+    public H264Decoder(int width, int height, Surface rendererSurface) {
+        this.width = width;
+        this.height = height;
+        this.rendererSurface = rendererSurface;
+        this.thread = new MediaCodecH264DecoderThread(this.width, this.height, this.buffer, this.rendererSurface);
+        this.thread.start();
 
-    public H264Decoder (int preference){
-        if( preference == FORCE_HARDWARE_DECODE) {
-
-        }
-
-        if(preference == FORCE_SOFTWARE_DECODE) {
-            this.decoder = new JCodecDecoder();
-        }
     }
 
-    public Bitmap decode(DrawPacket packet) {
-            return this.decoder.decode(packet);
+    public static H264Decoder create(int width, int height, Surface renderSurface) {
+        return new H264Decoder(width, height, renderSurface);
+    }
 
+    public H264Buffer getBuffer() {
+        return buffer;
+    }
 
+    public void stopDecode() {
+        this.thread.release();
     }
 }

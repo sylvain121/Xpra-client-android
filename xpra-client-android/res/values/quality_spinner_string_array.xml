@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="quality_spinner_string_array">
+        <item>Auto</item>
+        <item>(1%) Lowest</item>
+        <item>(10%) Very Low</item>
+        <item>(30%) Low</item>
+        <item>(50%) Average</item>
+        <item>(70%) Better</item>
+        <item>(90%) Best</item>
+    </string-array>
+</resources>

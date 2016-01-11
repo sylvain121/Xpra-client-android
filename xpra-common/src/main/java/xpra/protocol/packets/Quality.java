@@ -12,7 +12,7 @@ public class Quality extends Packet {
 
     /**
      *
-     * @param quality new fixed picture quality value from -1 to 100
+     * @param quality new fixed picture quality value from 0 to 100
      */
     public Quality(int quality) {
         super("quality");

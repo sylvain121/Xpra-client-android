@@ -44,9 +44,21 @@ public class HelloRequest extends Packet {
 		caps.put("bell", true);
 		caps.put("bencode", true);
 		caps.put("rencode", true);
+        caps.put("initial_quality", 1);
 		caps.put("chunked_compression", true);
-		if (defaultEncoding != null) {
-			caps.put("encoding", defaultEncoding.toString());
+		if(defaultEncoding == PictureEncoding.h264){
+			caps.put("encoding", "h264");
+            caps.put("encoding.generic", true);
+            caps.put("encoding.transparency", true);
+            caps.put("encoding.client_options", true);
+            caps.put("encoding.csc_atoms", true);
+            caps.put("encoding.video_reinit", false);
+            caps.put("encoding.video_scaling", false);
+            caps.put("encoding.full_csc_modes", "h264 : [\"YUV420P\"]");
+			caps.put("encoding.x264.YUV420P.profile", "baseline");
+		}
+		if (defaultEncoding == PictureEncoding.jpeg) {
+			caps.put("encoding", "jpeg");
 			if (PictureEncoding.jpeg.equals(defaultEncoding)) {
 				caps.put("jpeg", 40);
 			}
@@ -97,5 +109,4 @@ public class HelloRequest extends Packet {
 		super.serialize(elems);
 		elems.add(caps);
 	}
-
 }

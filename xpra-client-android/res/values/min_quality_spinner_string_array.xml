@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="min_quality_spinner_string_array">
+        <item>None</item>
+        <item>(10%) Very Low</item>
+        <item>(30%) Low</item>
+        <item>(50%) Average</item>
+        <item>(70%) Better</item>
+    </string-array>
+</resources>

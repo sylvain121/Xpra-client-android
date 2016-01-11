@@ -1,21 +1,77 @@
-<menu xmlns:android="http://schemas.android.com/apk/res/android" >
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
 
     <item
-        android:id="@+id/xpra_windows_section"
-        android:title="Taskbar">
+            android:id="@+id/xpra_windows_section"
+            android:title="Taskbar">
         <menu>
             <group android:id="@+id/xpra_windows_group"
-                android:checkableBehavior="single" />
+                   android:checkableBehavior="single"/>
         </menu>
     </item>
-    
-    <item
-        android:id="@+id/drawer_settings"
-        android:title="Settings"
-        android:icon="@drawable/ic_settings_applications_black_36dp" />
-    <item
-        android:id="@+id/drawer_disconnect"
-        android:title="Disconnect"
-        android:icon="@drawable/ic_power_settings_new_black_36dp" />
 
+    <item
+            android:id="@+id/drawer_quality_global"
+            android:title="Quality">
+        <menu>
+            <item
+                    android:id="@+id/drawer_qualityAuto"
+                    android:title="Auto"
+                    android:onClick="setQuality"
+                    />
+            <item
+                    android:id="@+id/drawer_quality1"
+                    android:title="(1%) Lowest"
+                    android:onClick="setQuality"/>
+            <item
+                    android:id="@+id/drawer_quality10"
+                    android:title="(10%) Very low"
+                    android:onClick="setQuality"/>
+            <item
+                    android:id="@+id/drawer_quality30"
+                    android:title="(30%) Low"
+                    android:onClick="setQuality"/>
+            <item
+                    android:id="@+id/drawer_quality50"
+                    android:title="(50%) Average"
+                    android:onClick="setQuality"/>
+            <item
+                    android:id="@+id/drawer_quality70"
+                    android:title="(70%) Better"
+                    android:onClick="setQuality"/>
+            <item
+                    android:id="@+id/drawer_quality90"
+                    android:title="(90%) Best"
+                    android:onClick="setQuality"/>
+        </menu>
+    </item>
+    <item
+            android:id="@+id/drawer_speed_global"
+            android:title="Speed">
+        <menu>
+            <item
+                    android:id="@+id/drawer_speedAuto"
+                    android:title="Auto"
+                    android:onClick="setSpeed"/>
+            <item
+                    android:id="@+id/drawer_speed_lowest_bandwidth"
+                    android:title="Lowest Bandwidth"
+                    android:onClick="setSpeed"/>
+            <item
+                    android:id="@+id/drawer_speed_low_bandwidth"
+                    android:title="Low Bandwidth"
+                    android:onClick="setSpeed"/>
+            <item
+                    android:id="@+id/drawer_speed_low_latency"
+                    android:title="Low Latency"
+                    android:onClick="setSpeed"/>
+            <item
+                    android:id="@+id/drawer_speed_lowest_latency"
+                    android:title="Lowest Latency"
+                    android:onClick="setSpeed"/>
+        </menu>
+    </item>
+    <item
+            android:id="@+id/drawer_disconnect"
+            android:title="Disconnect"
+            android:icon="@drawable/ic_power_settings_new_black_36dp"/>
 </menu>
