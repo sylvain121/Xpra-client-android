@@ -7,7 +7,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import android.view.*;
-import com.github.jksiezni.xpra.h264.H264Buffer;
 import com.github.jksiezni.xpra.h264.H264Decoder;
 import xpra.client.XpraWindow;
 import xpra.protocol.packets.DrawPacket;
@@ -50,10 +49,11 @@ public class AndroidXpraWindow extends XpraWindow implements OnTouchListener, On
     private Bitmap icon;
     private int currentWindowWidth = 0;
     private int currentWindowsHeight = 0;
+    private SurfaceTexture rendererSurface;
 
     public AndroidXpraWindow(NewWindow wnd, Context context) {
         super(wnd);
-        this.renderer = new Renderer();
+        this.renderer = new Renderer(this);
         this.uiHandler = new Handler(context.getMainLooper());
         this.textureView = new TextureView(context);
         this.textureView.setSurfaceTextureListener(renderer);
@@ -193,25 +193,31 @@ public class AndroidXpraWindow extends XpraWindow implements OnTouchListener, On
 
             switch (packet.encoding) {
                 case h264:
-                    if(this.currentWindowWidth != packet.w || this.currentWindowsHeight != packet.h) {
+                    if( rendererSurface != null  && decoder == null ){
+                        this.decoder = H264Decoder.create(packet.w, packet.h, new Surface(this.rendererSurface));
+                    }
+                    /*if(this.currentWindowWidth != packet.w || this.currentWindowsHeight != packet.h) {
                         Log.d(this.getClass().getName(), "New Decoder Factory");
                         this.currentWindowWidth = packet.w;
                         this.currentWindowsHeight = packet.h;
-                        this.decoder = H264Decoder.create(packet.w, packet.h, new Surface(this.textureView.getSurfaceTexture()));
+                        this.decoder = H264Decoder.create(packet.w, packet.h, new Surface(this.rendererSurface));
+                    }*/
+                    if( this.decoder != null) {
+                        this.decoder.getBuffer().addPacketToQueue(packet);
                     }
-                    this.decoder.getBuffer().addPacketToQueue(packet);
+
                     break;
                 case png:
                 case pngL:
                 case pngP:
                 case jpeg:
-                    Rect dirty = new Rect(packet.x, packet.y, packet.x + packet.w, packet.y + packet.h);
+                    /*Rect dirty = new Rect(packet.x, packet.y, packet.x + packet.w, packet.y + packet.h);
                     Canvas canvas = textureView.lockCanvas(dirty);
                     Bitmap bitmap = BitmapFactory.decodeByteArray(packet.data, 0, packet.data.length);
                     canvas.drawBitmap(bitmap, packet.x, packet.y, null);
                     textureView.unlockCanvasAndPost(canvas);
                     bitmap.recycle();
-                    break;
+                    break;*/
 
                 default:
                     break;
@@ -267,6 +273,10 @@ public class AndroidXpraWindow extends XpraWindow implements OnTouchListener, On
         return true;
     }
 
+    public void setSurfaceTexture(SurfaceTexture surface, int width, int height) {
+        this.rendererSurface = surface;
+    }
+
     public void close() {
         closeWindow();
     }
@@ -294,15 +304,18 @@ public class AndroidXpraWindow extends XpraWindow implements OnTouchListener, On
     private class Renderer extends HandlerThread implements SurfaceTextureListener {
 
 
+        private final AndroidXpraWindow xpraWindow;
 
-
-        public Renderer() {
+        public Renderer(AndroidXpraWindow androidXpraWindow) {
             super("Renderer");
+            this.xpraWindow = androidXpraWindow;
+
         }
 
         @Override
         public void onSurfaceTextureAvailable(SurfaceTexture surface, int width, int height) {
             Log.i(getClass().getSimpleName(), "onSurfaceTextureAvailable(): " + width + "x" + height);
+            this.xpraWindow.setSurfaceTexture(surface, width, height);
             final int x = (int) getView().getX();
             final int y = (int) getView().getY();
             mapWindow(x, y, width, height);

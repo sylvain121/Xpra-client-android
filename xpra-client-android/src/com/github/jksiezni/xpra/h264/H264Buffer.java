@@ -13,10 +13,28 @@ public class H264Buffer {
 
 
     public void addPacketToQueue(DrawPacket packet) {
-        this.buffer.add(packet);
+
+        try {
+            this.buffer.put(packet);
+            //bytesToHex(packet.data, 10);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
     }
 
     public DrawPacket getNext() throws InterruptedException {
-        return this.buffer.take();
+        synchronized (buffer) {
+            return this.buffer.take();
+        }
+    }
+    private void bytesToHex(byte[] bytes, int length) {
+        StringBuilder sb = new StringBuilder();
+        String result = "";
+        for (int i=0; i < length; i++) {
+            sb.append(String.format("%02X ", bytes[i]));
+            result +=" ";
+            result +=sb.toString();
+        }
+        Log.d(this.getClass().getName(), result);
     }
 }
