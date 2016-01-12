@@ -35,7 +35,7 @@ import android.widget.RelativeLayout.LayoutParams;
 /**
  * @author Jakub Księżniak
  */
-public class AndroidXpraWindow extends XpraWindow implements OnTouchListener, OnKeyListener, TextureView.SurfaceTextureListener {
+public class AndroidXpraWindow extends XpraWindow implements OnTouchListener, OnKeyListener {
 
     private final TextureView textureView;
     private final Handler uiHandler;
@@ -53,7 +53,7 @@ public class AndroidXpraWindow extends XpraWindow implements OnTouchListener, On
 
     public AndroidXpraWindow(NewWindow wnd, Context context) {
         super(wnd);
-        this.renderer = new Renderer(this);
+        this.renderer = new Renderer();
         this.uiHandler = new Handler(context.getMainLooper());
         this.textureView = new TextureView(context);
         this.textureView.setSurfaceTextureListener(renderer);
@@ -287,26 +287,6 @@ public class AndroidXpraWindow extends XpraWindow implements OnTouchListener, On
 
     }
 
-    @Override
-    public void onSurfaceTextureAvailable(SurfaceTexture surface, int width, int height) {
-;
-    }
-
-    @Override
-    public void onSurfaceTextureSizeChanged(SurfaceTexture surface, int width, int height) {
-
-    }
-
-    @Override
-    public boolean onSurfaceTextureDestroyed(SurfaceTexture surface) {
-        return false;
-    }
-
-    @Override
-    public void onSurfaceTextureUpdated(SurfaceTexture surface) {
-
-    }
-
     public void setH264Decoder(H264Decoder h264Decoder) {
         this.decoder = h264Decoder;
     }
@@ -314,11 +294,10 @@ public class AndroidXpraWindow extends XpraWindow implements OnTouchListener, On
     private class Renderer extends HandlerThread implements SurfaceTextureListener {
 
 
-        private final AndroidXpraWindow xpraWindow;
 
-        public Renderer(AndroidXpraWindow xpraWindow) {
+
+        public Renderer() {
             super("Renderer");
-            this.xpraWindow = xpraWindow;
         }
 
         @Override
